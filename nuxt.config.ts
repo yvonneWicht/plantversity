@@ -5,7 +5,19 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: {enabled: true},
-    modules: ['@vite-pwa/nuxt', '@nuxtjs/supabase', "@vueuse/nuxt", "@nuxt/test-utils/module", "@nuxt/eslint"],
+    modules: [
+        '@vite-pwa/nuxt',
+        '@nuxtjs/supabase',
+        "@vueuse/nuxt",
+        "@nuxt/eslint",
+        ...(process.env.NODE_ENV === 'test' ? ["@nuxt/test-utils/module"] : [])
+    ],
+    runtimeConfig: {
+        public: {
+            isDevelopment: process.env.NODE_ENV === 'development',
+            mockAuthEnabled: process.env.MOCK_AUTH === 'true'
+        }
+    },
     alias: {
         "@": resolve(__dirname, "/"),
     },

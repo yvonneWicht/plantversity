@@ -2,8 +2,9 @@
   <NuxtPwaManifest/>
   <NuxtRouteAnnouncer/>
   <NuxtPage/>
-  <NuxtLink to="/confirm">Nutzen um zu einer Route zu verlinken</NuxtLink>
+  <NuxtLink to="/">Nutzen um zu einer Route zu verlinken</NuxtLink>
 </template>
+
 <script setup lang="ts">
 </script>
 
