@@ -2,22 +2,18 @@
 import {resolve} from "path";
 import tailwindcss from "@tailwindcss/vite";
 
+const isTest = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST)
+
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: {enabled: true},
     modules: [
-        '@vite-pwa/nuxt',
+        ...(isTest ? [] : ['@vite-pwa/nuxt']),
         '@nuxtjs/supabase',
         "@vueuse/nuxt",
         "@nuxt/eslint",
-        ...(process.env.NODE_ENV === 'test' ? ["@nuxt/test-utils/module"] : [])
+        "@nuxt/fonts"
     ],
-    runtimeConfig: {
-        public: {
-            isDevelopment: process.env.NODE_ENV === 'development',
-            mockAuthEnabled: process.env.MOCK_AUTH === 'true'
-        }
-    },
     alias: {
         "@": resolve(__dirname, "/"),
     },
@@ -68,6 +64,24 @@ export default defineNuxtConfig({
         link: [
             { rel: 'apple-touch-icon', href: '/apple-touch-icon-180x180.png' }
         ]
-    }
+    },
+    fonts: {
+        defaults: {
+            weights: [400],
+            styles: ['normal', 'italic'],
+            subsets: [
+                'cyrillic-ext',
+                'cyrillic',
+                'greek-ext',
+                'greek',
+                'vietnamese',
+                'latin-ext',
+                'latin',
+            ]
+        },
+        families: [
+            { name: 'Commissioner', provider: 'google' },
+        ]
+        }
 })
 //alias ermöglicht es, alle elmeente mittels @ zu importieren

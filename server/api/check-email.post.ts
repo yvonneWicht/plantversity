@@ -3,27 +3,12 @@ import { createClient } from '@supabase/supabase-js'
 
 export default defineEventHandler(async (event) => {
     try {
-        // Request body lesen
         const body = await readBody(event)
         const { email } = body
 
-        console.log('API Route aufgerufen mit:', body)
-        console.log('Environment vars:', {
-            url: process.env.NUXT_PUBLIC_SUPABASE_URL,
-            hasKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
-        })
-
-        if (!email) {
-            throw createError({
-                statusCode: 400,
-                statusMessage: 'Email ist erforderlich'
-            })
-        }
-
-        // Supabase Admin Client erstellen (du brauchst den Service Role Key!)
         const supabase = createClient(
             process.env.NUXT_PUBLIC_SUPABASE_URL || 'https://kgwunclxpepbuosbdain.supabase.co',
-            process.env.SUPABASE_SERVICE_ROLE_KEY!, // Das fehlt wahrscheinlich!
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
             {
                 auth: {
                     autoRefreshToken: false,

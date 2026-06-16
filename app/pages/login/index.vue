@@ -1,91 +1,63 @@
 <template>
-  <div class="p-4 text-center w-screen h-screen">
-    <h1 class="text-xl font-bold p-2">Login to plantversity!</h1>
-    <p class="mb-4">
-      A gamified Progressive Web App (PWA) that helps users track the diversity of plant-based foods they consume and
-      motivates them to reach the goal of 30 different plants per week through progress tracking, badges, and
-      educational
-      insights.
+  <div class="p-4 text-center w-screen h-screen p-6 flex flex-col justify-between">
+    <h1 class="text-6xl/20 font-bold">Willkommen bei Plantversity!</h1>
+
+    <IconPlantjar class="h-1/3 justify-self-center"/>
+
+    <p class="text-2xl">
+      Ernähre dich vielfältig und gesund. Und das mit Spaß.<br>
+      Sammle Plant Points um deine wöchentliche Vielfalt von Pflanzen zu erhöhen!<br>
+      Fülle dein Plant Jar und sammle Erfolge in dem du in 7 Tagen 30 verschiedene pflanzliche Lebensmittel isst.
     </p>
 
-    <ElementButton buttonText="Login" @click="toggleSignIn"/>
-    <div v-if="signIn">
-      <form class="flex flex-col gap-1 mb-4" id="login-form" @submit.prevent="signInWithEmailPassword">
-        <label for="login-email">E-Mail-Adresse:</label>
-        <input
-          class="bg-white p-2 border rounded"
-          type="email"
-          id="login-email"
-          name="email"
-          placeholder="E-Mail-Adresse"
-          required
-        />
-        <label for="login-password">Passwort:</label>
-        <input
-          class="bg-white p-2 border rounded"
-          type="password"
-          id="login-password"
-          name="password"
-          placeholder="Passwort"
-          required
-        />
-        <ElementButton type="submit" buttonText="Anmelden"/>
+    <div class="h-[37vh] sticky bottom-0 left-6 right-6">
+    <div class="p-2 bg-white/80 rounded-4xl p-4">
+      <div class="flex flex-row gap-3 mb-3">
+        <div class="basis-1/2">
+          <ElementButtonSecondary buttonText="Login" @click="toggleSignIn" :state="signIn" datatestid="login-button"/>
+        </div>
+        <div class="basis-1/2">
+          <ElementButtonSecondary buttonText="Registrieren" @click="toggleRegister" :state="register" datatestid="register-button"/>
+        </div>
+      </div>
+
+      <div v-if="signIn">
         <div v-if="errorMessage" id="message" role="alert" aria-live="polite" class="text-red-600">
           {{ errorMessage }}
         </div>
-      </form>
-    </div>
+        <form class="flex flex-col gap-3" id="login-form" @submit.prevent="signInWithEmailPassword">
+          <FormInput type="email" id="login-email" name="email" placeholder="E-Mail-Adresse" required/>
+          <FormInput type="password" id="login-password" name="password" placeholder="Passwort" required/>
+          <ElementButtonPrimary type="submit" buttonText="Anmelden"/>
+        </form>
+      </div>
 
-    <!-- Register Form -->
-    <ElementButton buttonText="Registrieren" @click="toggleRegister"/>
-    <div v-if="register">
-      <form class="flex flex-col gap-1 mb-4" id="register-form" @submit.prevent="registerWithEmailPassword">
-        <label for="register-email">E-Mail-Adresse:</label>
-        <input
-          class="bg-white p-2 border rounded"
-          type="email"
-          id="register-email"
-          name="email"
-          placeholder="E-Mail-Adresse"
-          required
-        />
-        <label for="register-password">Passwort:</label>
-        <input
-          class="bg-white p-2 border rounded"
-          type="password"
-          id="register-password"
-          name="password"
-          placeholder="Passwort (min. 6 Zeichen)"
-          minlength="6"
-          required
-        />
-        <label for="display-name">Wie sollen wir dich nennen?:</label>
-        <input
-          class="bg-white p-2 border rounded"
-          type="text"
-          id="display-name"
-          name="displayName"
-          placeholder="Dein Name"
-          required
-        />
-        <ElementButton type="submit" buttonText="Registrieren" class="bg-green-700"/>
-        <div v-if="registerMessage" id="message" role="alert" aria-live="polite"
-             :class="registerMessage.includes('erfolgreich') ? 'text-green-600' : 'text-red-600'">
+      <!-- Register Form -->
+      <div v-if="register">
+        <div v-if="registerMessage" id="message" role="alert" aria-live="polite" class="text-2xl pb-6"
+             :class="registerMessage.includes('abzuschließen') ? 'text-green-600' : 'text-red-600'">
           {{ registerMessage }}
         </div>
-      </form>
+        <form v-if="!registerMessage.includes('abzuschließen')" class="flex flex-col gap-3" id="register-form" @submit.prevent="registerWithEmailPassword">
+          <FormInput type="email" id="register-email" name="email" placeholder="E-Mail-Adresse" required/>
+          <FormInput type="password" id="register-password" name="password" placeholder="Passwort (min. 6 Zeichen)" minlength="6" required/>
+          <FormInput type="text" id="register-display-name" name="displayName" placeholder="Wie sollen wir dich nennen?" required/>
+          <ElementButtonPrimary type="submit" buttonText="Registrieren"/>
+        </form>
+      </div>
+    </div>
     </div>
   </div>
 </template>
 
 
 <script setup lang="ts">
-const { currentUser, isLoggedIn, loginAsDev, isDevelopment, mockAuthEnabled } = useAuth()
+const {currentUser, isLoggedIn} = useAuth()
 
 // Weiterleitung wenn bereits eingeloggt
 watchEffect(() => {
   if (isLoggedIn.value) {
-    navigateTo('/dashboard')
+    navigateTo('/')
   }
 })
 
@@ -102,27 +74,22 @@ async function signInWithEmailPassword(event: Event) {
   errorMessage.value = ''
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const {data, error} = await supabase.auth.signInWithPassword({
       email,
       password
     })
 
     if (error) {
-      errorMessage.value = 'Login fehlgeschlagen. Überprüfen Sie E-Mail und Passwort.'
-      console.error('Login error:', error)
+      errorMessage.value = 'Login fehlgeschlagen. Überprüfe E-Mail und Passwort.'
       return
     }
 
-    // Erfolgreicher Login -> Weiterleitung erfolgt durch watchEffect
-    console.log('Login erfolgreich:', data.user?.email)
-
   } catch (error) {
-    console.error('Login error:', error)
-    errorMessage.value = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'
+    errorMessage.value = 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.'
   }
 }
 
-// Registrierung mit E-Mail + Passwort
+// Registrierung mit E-Mail + Passwort + Name
 async function registerWithEmailPassword(event: Event) {
   const form = event.target as HTMLFormElement
   const email = (form.email as HTMLInputElement).value
@@ -132,21 +99,21 @@ async function registerWithEmailPassword(event: Event) {
   registerMessage.value = ''
 
   try {
-    // 1. Erstmal prüfen ob Email bereits existiert (über Server-API)
+    // Prüfen ob Email bereits existiert (Server-API)
     const response = await $fetch('/api/check-email', {
       method: 'POST',
-      body: { email }  // ← Nur E-Mail, KEIN Passwort an den Server!
+      body: {email}  // ← Nur E-Mail, KEIN Passwort an den Server!
     })
 
     if (response.exists) {
-      registerMessage.value = 'Diese E-Mail-Adresse ist bereits registriert. Verwenden Sie stattdessen die Login-Funktion.'
+      registerMessage.value = 'Diese E-Mail-Adresse ist bereits registriert. Verwende den Login.'
       return
     }
 
-    // 2. Registrierung DIREKT mit Supabase (Frontend → Supabase)
-    const { data, error } = await supabase.auth.signUp({
+    // Registrierung mit Supabase (Frontend → Supabase)
+    const {data, error} = await supabase.auth.signUp({
       email,
-      password,  // ← HIER wird das Passwort direkt an Supabase gesendet
+      password,
       options: {
         data: {
           name: displayName,
@@ -161,26 +128,25 @@ async function registerWithEmailPassword(event: Event) {
       return
     }
 
-    registerMessage.value = 'Registrierung erfolgreich! Sie können sich jetzt anmelden.'
+    registerMessage.value = 'Bestätige deine Mail-Adresse über den Link in der E-Mail um die Registrierung abzuschließen.'
 
   } catch (error) {
-    console.error('Fehler bei der Registrierung:', error)
-    registerMessage.value = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'
+    registerMessage.value = 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.'
   }
 }
 
 // UI State
-const signIn = ref(false)
+const signIn = ref(true)
 const register = ref(false)
 
 function toggleSignIn() {
-  signIn.value = !signIn.value
+  signIn.value = true
   register.value = false
   errorMessage.value = ''
 }
 
 function toggleRegister() {
-  register.value = !register.value
+  register.value = true
   signIn.value = false
   registerMessage.value = ''
 }

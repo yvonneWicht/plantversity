@@ -1,11 +1,22 @@
 <template>
-  <div class="p-4 text-center w-screen h-screen">
-    <h1 class="text-xl font-bold p-2">Welcome to plantversity!</h1>
-    <p>
-      A gamified Progressive Web App (PWA) that helps users track the diversity of plant-based foods they consume and
-      motivates them to reach the goal of 30 different plants per week through progress tracking, badges, and
-      educational
-      insights.
-    </p>
+  <div class="p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-3xl font-bold">Dashboard</h1>
+      <div class="flex items-center gap-2">
+        <span v-if="currentUser">Hallo {{ currentUser.user_metadata?.display_name || currentUser.email }}!</span>
+        <ElementButtonPrimary buttonText="Logout" @click="logout"/>
+      </div>
+    </div>
+
+    <p>Willkommen bei Plantversity!</p>
+
   </div>
 </template>
+
+<script setup lang="ts">
+const { currentUser, logout } = useAuth()
+
+definePageMeta({
+  middleware: 'auth'
+})
+</script>

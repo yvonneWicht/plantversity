@@ -1,6 +1,6 @@
 <template>
-  <NuxtLink :to="targetLink">
-    <button class="bg-green-700 flex flex-col m-3 p-2" :type>
+  <NuxtLink :to="targetLink" class="flex flex-col">
+    <button class="bg-primary-green text-2xl text-white p-4 rounded-full" :type>
       {{ buttonText }}</button>
 
   </NuxtLink>

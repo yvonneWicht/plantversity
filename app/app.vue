@@ -2,7 +2,6 @@
   <NuxtPwaManifest/>
   <NuxtRouteAnnouncer/>
   <NuxtPage/>
-  <NuxtLink to="/">Nutzen um zu einer Route zu verlinken</NuxtLink>
 </template>
 
 <script setup lang="ts">
