@@ -18,8 +18,6 @@
       Content<br>
       Content<br>
       Content<br>
-      Content<br>
-      Content<br>
     </ElementBox>
   </div>
 

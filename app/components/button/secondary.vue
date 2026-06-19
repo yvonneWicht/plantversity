@@ -10,7 +10,7 @@ defineProps({
 <template>
   <NuxtLink :to="targetLink" class="flex flex-col">
     <button
-      class="p-1 rounded-full text-sm"
+      class="p-1 rounded-full"
       :class="state ? 'bg-beige' : 'bg-transparent'"
       :type
       :data-testid
