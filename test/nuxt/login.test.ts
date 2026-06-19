@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
@@ -7,7 +7,6 @@ import LoginPage from '../../app/pages/login/index.vue'
 const mocks = vi.hoisted(() => {
     return {
         signInWithPasswordMock: vi.fn(),
-        signUpMock: vi.fn(),
         signUpMock: vi.fn(),
         signOutMock: vi.fn(),
         navigateToMock: vi.fn()
@@ -170,5 +169,55 @@ describe('login-page', () => {
             email: 'test@example.com',
             password: 'secret123'
         })
+    })
+
+    it('shows error when signing in with invalid credentials', async () => {
+        mocks.signInWithPasswordMock.mockResolvedValueOnce({
+            data: {
+                user: null,
+                session: null
+            },
+            error: {
+                message: 'Login fehlgeschlagen. Überprüfe E-Mail und Passwort.'
+            }
+        })
+
+        const wrapper = mount(LoginPage, {
+            global: {
+                stubs: {
+                    IconPlantjar: true,
+                    ElementButtonSecondary: {
+                        template: '<button type="button" @click="$emit(\'click\')">{{ buttonText }}</button>',
+                        props: ['buttonText', 'state']
+                    },
+                    ElementButtonPrimary: {
+                        template: '<button :type="type">{{ buttonText }}</button>',
+                        props: ['buttonText', 'type']
+                    },
+                    FormInput: {
+                        template: '<input :type="type" :id="id" :name="name" :placeholder="placeholder" />',
+                        props: ['type', 'id', 'name', 'placeholder']
+                    }
+                }
+            }
+        })
+
+        await wrapper.find('#login-email').setValue('test123@example.com')
+        await wrapper.find('#login-password').setValue('wrong-password')
+        await wrapper.find('#login-form').trigger('submit')
+        await flushPromises()
+        console.log("----------------WRAPPER----------------")
+        console.log(wrapper.html())
+
+        expect(mocks.signInWithPasswordMock).toHaveBeenCalledWith({
+            email: 'test123@example.com',
+            password: 'wrong-password'
+        })
+
+        const signInMessage = wrapper.find('#signIn-message')
+
+        expect(signInMessage.exists()).toBe(true)
+        expect(signInMessage.text()).toContain('Login fehlgeschlagen. Überprüfe E-Mail und Passwort.')
+        expect(mocks.navigateToMock).not.toHaveBeenCalled()
     })
 })

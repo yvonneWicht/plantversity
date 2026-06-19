@@ -12,7 +12,8 @@ export default defineNuxtConfig({
         '@nuxtjs/supabase',
         "@vueuse/nuxt",
         "@nuxt/eslint",
-        "@nuxt/fonts"
+        "@nuxt/fonts",
+        "@nuxt/icon"
     ],
     alias: {
         "@": resolve(__dirname, "/"),

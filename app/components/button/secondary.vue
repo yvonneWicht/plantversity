@@ -1,3 +1,12 @@
+<script setup lang="ts">
+defineProps({
+  targetLink: String,
+  type: String,
+  state: Boolean,
+  "data-testid": String
+})
+</script>
+
 <template>
   <NuxtLink :to="targetLink" class="flex flex-col">
     <button
@@ -6,18 +15,8 @@
       :type
       :data-testid
     >
-      {{ buttonText }}
+      <slot/>
     </button>
 
   </NuxtLink>
 </template>
-
-<script setup lang="ts">
-defineProps({
-  targetLink: String,
-  buttonText: String,
-  type: String,
-  state: Boolean,
-  "data-testid": String
-})
-</script>

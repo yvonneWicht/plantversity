@@ -1,22 +1,30 @@
 <template>
-  <div class="p-4">
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-3xl font-bold">Dashboard</h1>
-      <div class="flex items-center gap-2">
-        <span v-if="currentUser">Hallo {{ currentUser.user_metadata?.display_name || currentUser.email }}!</span>
-        <ElementButtonPrimary buttonText="Logout" @click="logout"/>
-      </div>
-    </div>
+  <div class="flex flex-col gap-8">
+    <IconPlantJar class="grow justify-self-center px-16"/>
 
-    <p>Willkommen bei Plantversity!</p>
+    <ElementProgressBar/>
 
+    <ElementToggle primaryButtonText="Pflanzen" secondaryButtonText="Mahlzeiten">
+      <template #primary>
+          <FormSearch type="text" id="plant-search" name="plant-search" placeholder="Pflanze suchen"/>
+      </template>
+      <template #secondary>
+        <FormSearch type="text" id="plant-search" name="plant-search" placeholder="Mahlzeit suchen"/>
+      </template>
+    </ElementToggle>
+
+
+    <ElementBox headline="Heute gegessen" class="min-h-[200px]">
+      Content<br>
+      Content<br>
+      Content<br>
+      Content<br>
+      Content<br>
+    </ElementBox>
   </div>
+
 </template>
 
 <script setup lang="ts">
-const { currentUser, logout } = useAuth()
-
-definePageMeta({
-  middleware: 'auth'
-})
+import Search from "~/components/form/search.vue";
 </script>
