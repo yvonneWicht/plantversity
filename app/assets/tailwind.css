@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+    --font-display: "Commissioner", "sans-serif";
+    --color-beige: #dcd188;
+    --color-dark-green: #001e00;
+    --color-primary-green: #134c29;
+}
+
+body {
+    font-family: var(--font-display);
+    color: var(--color-dark-green);
+}
