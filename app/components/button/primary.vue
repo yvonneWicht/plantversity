@@ -1,13 +1,14 @@
 <script setup lang="ts">
 defineProps({
   targetLink: String,
+  class: String,
   type: String
 })
 </script>
 
 <template>
   <NuxtLink :to="targetLink" class="flex flex-col">
-    <button class="bg-primary-green text-2xl text-white p-4 rounded-full" :type>
+    <button class="bg-primary-green text-white p-1 rounded-full text-sm" :class="class" :type>
       <slot/>
     </button>
   </NuxtLink>
