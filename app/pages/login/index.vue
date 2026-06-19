@@ -3,13 +3,12 @@
 
     <IconPlantJar class="h-1/3 justify-self-center"/>
 
-    <p class="text-sm">
-      Ernähre dich vielfältig und gesund. Und das mit Spaß.
-      Sammle Plant Points um deine wöchentliche Vielfalt von Pflanzen zu erhöhen!
-      Fülle dein Plant Jar und sammle Erfolge in dem du in 7 Tagen 30 verschiedene pflanzliche Lebensmittel isst.
-    </p>
+<!--    <p class="text-sm">-->
+<!--      Ernähre dich vielfältig und gesund. Und das mit Spaß.-->
+<!--      Sammle Plant Points um deine wöchentliche Vielfalt von Pflanzen zu erhöhen!-->
+<!--    </p>-->
 
-    <div class="h-[37vh] sticky bottom-0 left-6 right-6">
+    <div class="h-[45vh] sticky bottom-0 left-6 right-6">
       <ElementToggle primaryButtonText="Login" secondaryButtonText="Registrieren">
         <template #primary>
           <div v-if="errorMessage" id="signIn-message" role="alert" aria-live="polite" class="text-sm pb-2 text-red-600">
