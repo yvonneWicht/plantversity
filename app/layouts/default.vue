@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="flex flex-col h-screen p-4">
+  <div class="flex flex-col h-svh py-2 px-3">
     <div class="grow">
       <NavigationTop/>
 

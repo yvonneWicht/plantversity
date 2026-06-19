@@ -18,7 +18,7 @@ defineProps({
     />
 
     <ButtonPrimary
-      class="absolute right-0 top-1/2 -translate-y-1/2 w-16"
+      class="absolute right-0 top-1/2 -translate-y-1/2 h-full aspect-square"
       @click=""
     >
       +
