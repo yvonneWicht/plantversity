@@ -14,10 +14,10 @@ const isCurrentRoute = computed(() => route.path === link)
     <div class="flex flex-col items-center">
       <Icon
         :name="icon"
-        size="40px"
+        size="24px"
         :class="isCurrentRoute ? 'text-primary-green' : 'text-primary-green/40'"
       />
-      <p>
+      <p class="text-xs">
         <slot/>
       </p>
     </div>

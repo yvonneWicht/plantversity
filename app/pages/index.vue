@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-8">
+  <div class="flex flex-col gap-3">
     <IconPlantJar class="grow justify-self-center px-16"/>
 
     <ElementProgressBar/>
@@ -14,7 +14,7 @@
     </ElementToggle>
 
 
-    <ElementBox headline="Heute gegessen" class="min-h-[200px]">
+    <ElementBox headline="Heute gegessen" class="max-h-[150px]">
       Content<br>
       Content<br>
       Content<br>

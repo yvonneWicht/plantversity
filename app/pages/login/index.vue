@@ -1,18 +1,18 @@
 <template>
-    <h1 class="text-6xl/20 font-bold">Willkommen bei Plantversity!</h1>
+    <h1 class="text-3xl font-bold">Willkommen bei Plantversity!</h1>
 
     <IconPlantJar class="h-1/3 justify-self-center"/>
 
-    <p class="text-2xl">
-      Ernähre dich vielfältig und gesund. Und das mit Spaß.<br>
-      Sammle Plant Points um deine wöchentliche Vielfalt von Pflanzen zu erhöhen!<br>
+    <p class="text-sm">
+      Ernähre dich vielfältig und gesund. Und das mit Spaß.
+      Sammle Plant Points um deine wöchentliche Vielfalt von Pflanzen zu erhöhen!
       Fülle dein Plant Jar und sammle Erfolge in dem du in 7 Tagen 30 verschiedene pflanzliche Lebensmittel isst.
     </p>
 
     <div class="h-[37vh] sticky bottom-0 left-6 right-6">
       <ElementToggle primaryButtonText="Login" secondaryButtonText="Registrieren">
         <template #primary>
-          <div v-if="errorMessage" id="signIn-message" role="alert" aria-live="polite" class="text-red-600">
+          <div v-if="errorMessage" id="signIn-message" role="alert" aria-live="polite" class="text-sm pb-2 text-red-600">
             {{ errorMessage }}
           </div>
           <form class="flex flex-col gap-3" id="login-form" @submit.prevent="signInWithEmailPassword">
@@ -22,7 +22,7 @@
           </form>
         </template>
         <template #secondary>
-          <div v-if="registerMessage" id="register-message" role="alert" aria-live="polite" class="text-2xl pb-6"
+          <div v-if="registerMessage" id="register-message" role="alert" aria-live="polite" class="text-sm pb-2"
                :class="registerMessage.includes('abzuschließen') ? 'text-green-600' : 'text-red-600'">
             {{ registerMessage }}
           </div>
@@ -34,42 +34,6 @@
           </form>
         </template>
       </ElementToggle>
-
-<!--    <ElementBox>-->
-<!--      <div class="flex flex-row gap-3 mb-3">-->
-<!--        <div class="basis-1/2">-->
-<!--          <ButtonSecondary buttonText="Login" @click="toggleSignIn" :state="signIn" datatestid="login-button"/>-->
-<!--        </div>-->
-<!--        <div class="basis-1/2">-->
-<!--          <ButtonSecondary buttonText="Registrieren" @click="toggleRegister" :state="register" datatestid="register-button"/>-->
-<!--        </div>-->
-<!--      </div>-->
-
-<!--      <div v-if="signIn">-->
-<!--        <div v-if="errorMessage" id="signIn-message" role="alert" aria-live="polite" class="text-red-600">-->
-<!--          {{ errorMessage }}-->
-<!--        </div>-->
-<!--        <form class="flex flex-col gap-3" id="login-form" @submit.prevent="signInWithEmailPassword">-->
-<!--          <FormInput type="email" id="login-email" name="email" placeholder="E-Mail-Adresse" required/>-->
-<!--          <FormInput type="password" id="login-password" name="password" placeholder="Passwort" required/>-->
-<!--          <ButtonPrimary type="submit" buttonText="Anmelden"/>-->
-<!--        </form>-->
-<!--      </div>-->
-
-<!--      &lt;!&ndash; Register Form &ndash;&gt;-->
-<!--      <div v-if="register">-->
-<!--        <div v-if="registerMessage" id="register-message" role="alert" aria-live="polite" class="text-2xl pb-6"-->
-<!--             :class="registerMessage.includes('abzuschließen') ? 'text-green-600' : 'text-red-600'">-->
-<!--          {{ registerMessage }}-->
-<!--        </div>-->
-<!--        <form v-if="!registerMessage.includes('abzuschließen')" class="flex flex-col gap-3" id="register-form" @submit.prevent="registerWithEmailPassword">-->
-<!--          <FormInput type="email" id="register-email" name="email" placeholder="E-Mail-Adresse" required/>-->
-<!--          <FormInput type="password" id="register-password" name="password" placeholder="Passwort (min. 6 Zeichen)" minlength="6" required/>-->
-<!--          <FormInput type="text" id="register-display-name" name="displayName" placeholder="Wie sollen wir dich nennen?" required/>-->
-<!--          <ButtonPrimary type="submit" buttonText="Registrieren"/>-->
-<!--        </form>-->
-<!--      </div>-->
-<!--    </ElementBox>-->
     </div>
 </template>
 

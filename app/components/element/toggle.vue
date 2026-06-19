@@ -20,7 +20,7 @@ function toggleSecondary() {
 
 <template>
   <ElementBox>
-    <div class="flex flex-row gap-3 mb-3">
+    <div class="flex flex-row gap-2 mb-2">
       <div class="basis-1/2">
         <ButtonSecondary @click="togglePrimary" :state=primaryState
                          datatestid="primaryToggle">{{ primaryButtonText }}</ButtonSecondary>
