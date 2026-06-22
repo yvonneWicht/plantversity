@@ -6,10 +6,10 @@
 
     <ElementToggle primaryButtonText="Pflanzen" secondaryButtonText="Mahlzeiten">
       <template #primary>
-          <FormSearch type="text" id="plant-search" name="plant-search" placeholder="Pflanze suchen"/>
+          <FormSearch v-model="search" type="text" id="plant-search" name="plant-search" placeholder="Pflanze suchen"/>
       </template>
       <template #secondary>
-        <FormSearch type="text" id="plant-search" name="plant-search" placeholder="Mahlzeit suchen"/>
+        <FormSearch v-model="search" ype="text" id="plant-search" name="plant-search" placeholder="Mahlzeit suchen"/>
       </template>
     </ElementToggle>
 
@@ -24,5 +24,5 @@
 </template>
 
 <script setup lang="ts">
-import Search from "~/components/form/search.vue";
+  const search = ref('')
 </script>
