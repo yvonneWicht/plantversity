@@ -1,3 +1,6 @@
+<script setup lang="ts">
+</script>
+
 <template>
   <NuxtPwaManifest/>
   <NuxtRouteAnnouncer/>
@@ -5,9 +8,6 @@
     <NuxtPage/>
   </NuxtLayout>
 </template>
-
-<script setup lang="ts">
-</script>
 
 
 <!--VueUse Library mit Standard-Funktionen https://vueuse.org/functions.html-->

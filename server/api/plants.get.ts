@@ -1,6 +1,9 @@
+// TODO: Route must be available only for logged in users
+
 import {createClient} from '@supabase/supabase-js'
 
 export default defineEventHandler(async (event) => {
+    // Authentication to Supabase, needed to make database requests
     const supabase = createClient(
         process.env.NUXT_PUBLIC_SUPABASE_URL || 'https://kgwunclxpepbuosbdain.supabase.co',
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -18,7 +21,7 @@ export default defineEventHandler(async (event) => {
     const {data: plants, error} = await supabase
         .from('plants')
         .select('*')
-        .ilike('name', `%${search}%`)
+        .ilike('name', `${search}%`)
         .limit(10)
 
     return plants;
