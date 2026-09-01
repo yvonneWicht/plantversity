@@ -1,3 +1,5 @@
+<!--This component is used to toggle between two different views.-->
+
 <script setup lang="ts">
 defineProps({
   primaryButtonText: String,

@@ -1,3 +1,4 @@
+// Checks if mail adress is already registered tp show if email is available
 
 import { createClient } from '@supabase/supabase-js'
 

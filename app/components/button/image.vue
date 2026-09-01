@@ -1,3 +1,5 @@
+<!--This Button component is used to display an image button with a link and text in the main navigation-->
+
 <script setup lang="ts">
 const { link, icon } = defineProps<{
   link: string
