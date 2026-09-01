@@ -1,3 +1,5 @@
+<!--This layout contains no navigation elements and is used for the login screen.-->
+
 <script setup lang="ts">
 </script>
 
