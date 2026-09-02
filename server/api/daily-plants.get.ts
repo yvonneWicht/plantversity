@@ -4,6 +4,7 @@ import {serverSupabaseUser} from '#supabase/server'
 export default defineEventHandler(async (event) => {
     // User aus der Session lesen -> Route ist nur für eingeloggte User nutzbar
     const user = await serverSupabaseUser(event)
+    if (!user) throw createError({ statusCode: 401 })
 
     const query = getQuery(event)
     const range = (query.range as string) || 'today'
