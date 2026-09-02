@@ -14,22 +14,17 @@
     query: { range: '7days' }
   })
 
-  const uniqueWeeklyPlants = computed(() => {
-    if (!weeklyPlants.value) return []
+  const { data: plantPoints } = await useFetch('/api/plant-points')
 
-    return Array.from(
-      new Map(
-        weeklyPlants.value.map((entry) => [entry.plant?.id, entry])
-      ).values()
-    )
-  })
+  console.log('plantPoints: ')
+  console.log(plantPoints)
 </script>
 
 <template>
   <div class="flex flex-col gap-3 h-full grow min-h-0">
     <IconPlantJar class="flex-none min-h-2/5 max-h-2/4 justify-self-center px-16"/>
 
-    <ElementProgressBar class="flex-none" :amountWeeklyPlants="uniqueWeeklyPlants.length"/>
+    <ElementProgressBar class="flex-none" :amountWeeklyPlants="plantPoints.totalPoints"/>
 
     <ElementToggle primaryButtonText="Pflanzen" secondaryButtonText="Mahlzeiten" class="flex-none">
       <template #primary>
