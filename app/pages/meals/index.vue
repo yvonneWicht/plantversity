@@ -22,7 +22,7 @@ const selectedPlants = ref<Plant[]>([])
 const isSaving = ref(false)
 const saveError = ref('')
 
-const { data: meals, refresh: refreshMeals } = await useFetch<MealListItem[]>('/api/meals')
+const {data: meals, refresh: refreshMeals} = await useFetch<MealListItem[]>('/api/meals')
 
 const DEBOUNCE_MS = 250
 let nameCheckTimer: ReturnType<typeof setTimeout> | null = null
@@ -43,7 +43,7 @@ watch(mealName, (value) => {
     try {
       const response = await $fetch('/api/check-meal-name', {
         method: 'POST',
-        body: { name: trimmed }
+        body: {name: trimmed}
       })
       nameTaken.value = response.exists
     } catch (error) {
@@ -76,7 +76,7 @@ async function saveMeal() {
   try {
     const meal = await $fetch('/api/meals', {
       method: 'POST',
-      body: { name: mealName.value.trim() }
+      body: {name: mealName.value.trim()}
     })
 
     await $fetch('/api/meal-plants', {
@@ -111,8 +111,19 @@ async function saveMeal() {
 
 <template>
   <div class="flex flex-col gap-3 h-full grow min-h-0">
-    <ElementToggle v-model="isPrimary" primary-button-text="Deine Mahlzeiten" secondary-button-text="Mahlzeit erstellen" class="grow min-h-0">
+    <ElementToggle v-model="isPrimary" primary-button-text="Deine Mahlzeiten" secondary-button-text="Mahlzeit erstellen"
+                   class="grow min-h-0">
       <template #primary>
+        <div v-if="meals && meals.length > 0" class="flex flex-col gap-3 h-full min-h-0">
+          <ElementMeal v-for="meal in meals" :key="meal.id" :name="meal.name"/>
+        </div>
+        <div v-else class="flex flex-col gap-3 h-full min-h-0">
+          <div class="flex flex-col gap-3 items-center justify-center grow">
+            <div class="text-lg">Hier ist noch nichts passiert!</div>
+              <img src="~/assets/images/leafs.svg" width="100" height="100" alt="Leafs">
+            <div class="text-sm text-center">Erstelle und verwalte deine Lieblingsmahlzeiten um diese mit nur einem Klick zu tracken!</div>
+          </div>
+        </div>
       </template>
       <template #secondary>
         <div class="flex flex-col gap-3 h-full min-h-0">

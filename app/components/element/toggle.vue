@@ -9,7 +9,7 @@ const isPrimary = defineModel<boolean>({ default: true })
 
 <template>
   <ElementBox>
-    <div class="flex flex-row gap-2 mb-2">
+    <div class="flex flex-row gap-2 mb-3">
       <div class="basis-1/2">
         <ButtonSecondary
           :state="isPrimary"
