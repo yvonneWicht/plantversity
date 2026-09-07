@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const {currentUser, logout} = useAuth()
+const {logout} = useAuth()
 
 definePageMeta({
   middleware: 'auth'

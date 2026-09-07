@@ -79,7 +79,7 @@ describe('login-page', () => {
             }
         })
 
-        await wrapper.find('[datatestid="register-button"]').trigger('click')
+        await wrapper.find('[data-testid="register-button"]').trigger('click')
 
         expect(wrapper.find('#register-form').exists()).toBe(true)
         expect(wrapper.find('#login-form').exists()).toBe(false)
@@ -155,7 +155,7 @@ describe('login-page', () => {
             }
         })
 
-        await wrapper.find('[datatestid="register-button"]').trigger('click')
+        await wrapper.find('[data-testid="register-button"]').trigger('click')
 
         expect(wrapper.find('#register-form').exists()).toBe(true)
         expect(wrapper.find('#login-form').exists()).toBe(false)

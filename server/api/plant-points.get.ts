@@ -1,5 +1,6 @@
 import {createClient} from '@supabase/supabase-js'
 import {serverSupabaseUser} from '#supabase/server'
+import {getStartDateForRange} from '../utils/date'
 
 export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event)
@@ -16,17 +17,7 @@ export default defineEventHandler(async (event) => {
         }
     )
 
-    function getLocalDateString(date = new Date()): string {
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const day = String(date.getDate()).padStart(2, '0')
-        return `${year}-${month}-${day}`
-    }
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 6)
-
-    const dateString = getLocalDateString(startDate)
+    const dateString = getStartDateForRange('7days')
     const userId = user.id || user.user_metadata?.sub
 
     const { data, error } = await supabase

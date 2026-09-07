@@ -1,6 +1,7 @@
 // TODO: Route must be available only for logged in users
 
 import { createClient } from '@supabase/supabase-js'
+import { getTodayDateString } from '../utils/date'
 
 export default defineEventHandler(async (event) => {
     const supabase = createClient(
@@ -15,6 +16,7 @@ export default defineEventHandler(async (event) => {
     )
 
     const body = await readBody(event)
+    const createdAt = body.created_at || getTodayDateString()
 
     // 1. Check if an entry already exists for this user, plant, and date
     const { data: existingEntry, error: checkError } = await supabase
@@ -22,7 +24,7 @@ export default defineEventHandler(async (event) => {
         .select('id')
         .eq('plant', body.plant)
         .eq('created_by', body.created_by)
-        .eq('created_at', body.created_at)
+        .eq('created_at', createdAt)
         .maybeSingle()
 
     if (checkError) {
@@ -40,7 +42,10 @@ export default defineEventHandler(async (event) => {
     // 2. Insert new entry if not present
     const { data, error } = await supabase
         .from('daily_plants')
-        .insert(body)
+        .insert({
+            ...body,
+            created_at: createdAt
+        })
         .select()
 
     if (error) {
