@@ -16,14 +16,14 @@ const { data: plantPoints } = await useFetch('/api/plant-points')
   <div class="flex flex-col gap-3 h-full grow min-h-0">
     <IconPlantJar class="flex-none min-h-2/5 max-h-2/4 justify-self-center px-16"/>
 
-    <ElementProgressBar class="flex-none" :amountWeeklyPlants="plantPoints?.totalPoints ?? 0"/>
+    <ElementProgressBar class="flex-none" :amount-weekly-plants="plantPoints?.totalPoints ?? 0"/>
 
-    <ElementToggle primaryButtonText="Pflanzen" secondaryButtonText="Mahlzeiten" class="flex-none">
+    <ElementToggle primary-button-text="Pflanzen" secondary-button-text="Mahlzeiten" class="flex-none">
       <template #primary>
-        <FormSearch v-model="search" :dailyPlants="dailyPlants ?? []" type="text" id="plant-search" name="plant-search" placeholder="Pflanze suchen"/>
+        <FormSearch id="plant-search" v-model="search" :daily-plants="dailyPlants ?? []" type="text" name="plant-search" placeholder="Pflanze suchen"/>
       </template>
       <template #secondary>
-        <FormSearch v-model="search" type="text" id="plant-search" name="plant-search" placeholder="Mahlzeit suchen"/>
+        <FormSearch id="plant-search" v-model="search" type="text" name="plant-search" placeholder="Mahlzeit suchen"/>
       </template>
     </ElementToggle>
 

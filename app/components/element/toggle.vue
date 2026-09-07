@@ -12,20 +12,20 @@ const isPrimary = defineModel<boolean>({ default: true })
     <div class="flex flex-row gap-2 mb-2">
       <div class="basis-1/2">
         <ButtonSecondary
-          @click="isPrimary = true"
           :state="isPrimary"
           class="w-full"
           data-testid="primaryToggle"
+          @click="isPrimary = true"
         >
           {{ primaryButtonText }}
         </ButtonSecondary>
       </div>
       <div class="basis-1/2">
         <ButtonSecondary
-          @click="isPrimary = false"
           :state="!isPrimary"
           class="w-full"
           data-testid="secondaryToggle"
+          @click="isPrimary = false"
         >
           {{ secondaryButtonText }}
         </ButtonSecondary>

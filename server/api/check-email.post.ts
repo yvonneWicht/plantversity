@@ -40,11 +40,12 @@ export default defineEventHandler(async (event) => {
             exists: Boolean(exists),
             message: exists ? 'E-Mail-Adresse bereits registriert' : 'E-Mail-Adresse verfügbar'
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('API Error:', error)
+        const err = error as { statusCode?: number; statusMessage?: string; message?: string }
         throw createError({
-            statusCode: error.statusCode || 500,
-            statusMessage: error.statusMessage || 'Server-Fehler bei der Email-Prüfung'
+            statusCode: err?.statusCode || 500,
+            statusMessage: err?.statusMessage || err?.message || 'Server-Fehler bei der Email-Prüfung'
         })
     }
 })

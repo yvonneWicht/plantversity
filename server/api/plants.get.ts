@@ -24,5 +24,12 @@ export default defineEventHandler(async (event) => {
         .ilike('name', `${search}%`)
         .limit(10)
 
-    return plants;
+    if (error) {
+        throw createError({
+            statusCode: 500,
+            statusMessage: error.message
+        })
+    }
+
+    return plants
 })

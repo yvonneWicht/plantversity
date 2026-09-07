@@ -4,7 +4,7 @@ defineProps<{
   type?: 'button' | 'submit' | 'reset'
   state?: boolean
   class?: string
-  'data-testid'?: string
+  'dataTestId'?: string
 }>()
 </script>
 
@@ -15,7 +15,7 @@ defineProps<{
     role="button"
     class="p-2 rounded-full inline-block text-center"
     :class="[state ? 'bg-beige' : 'bg-transparent', $props.class]"
-    :data-testid="$props['data-testid']"
+    :data-testid="$props['dataTestId']"
   >
     <slot />
   </NuxtLink>
@@ -25,7 +25,7 @@ defineProps<{
     class="p-2 rounded-full"
     :class="[state ? 'bg-beige' : 'bg-transparent', $props.class]"
     :type="type || 'button'"
-    :data-testid="$props['data-testid']"
+    :data-testid="$props['dataTestId']"
   >
     <slot />
   </button>

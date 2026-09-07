@@ -1,16 +1,28 @@
 <script setup lang="ts">
+interface PlantSearchResult {
+  id: string
+  name: string
+  [key: string]: unknown
+}
+
+interface DailyPlantEntry {
+  id?: string
+  plant?: string | PlantSearchResult | { id?: string; name?: string; [key: string]: unknown } | null
+  [key: string]: unknown
+}
+
 const props = defineProps<{
   type?: string
   id?: string
   name?: string
   placeholder?: string
-  dailyPlants?: any[]
+  dailyPlants?: DailyPlantEntry[]
 }>()
 
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
 const search = defineModel<string>()
-const results = ref<any[]>([])
+const results = ref<PlantSearchResult[]>([])
 const selectedPlantId = ref<string | null>(null)
 const isSubmitting = ref(false)
 const isSelected = ref(false)
@@ -132,9 +144,9 @@ async function addPlant(plantId: string | null) {
   <div ref="searchWrapper" class="relative">
     <form class="relative z-10" @submit.prevent="addPlant(selectedPlantId)">
       <FormInput
+        :id="id"
         v-model="search"
         :type="type"
-        :id="id"
         :name="name"
         :placeholder="placeholder"
         class="w-full pr-16"
@@ -153,7 +165,7 @@ async function addPlant(plantId: string | null) {
     <div v-if="results.length > 0" class="relative">
       <ul class="absolute top-full left-0 right-0 rounded-3xl bg-white -mt-8 pt-8 z-0">
         <li v-for="result in results" :key="result.id" class="px-4 py-1">
-          <button type="button" @click="selectPlant(result)" class="text-left w-full">
+          <button type="button" class="text-left w-full" @click="selectPlant(result)">
             {{ result.name }}
           </button>
         </li>
