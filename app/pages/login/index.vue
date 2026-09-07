@@ -88,20 +88,28 @@ async function registerWithEmailPassword(event: Event) {
 }
 
 // UI State
-const signIn = ref(true)
-const register = ref(false)
+// const signIn = ref(true)
+// const register = ref(false)
+//
+// function toggleSignIn() {
+//   signIn.value = true
+//   register.value = false
+//   errorMessage.value = ''
+// }
+//
+// function toggleRegister() {
+//   register.value = true
+//   signIn.value = false
+//   registerMessage.value = ''
+// }
 
-function toggleSignIn() {
-  signIn.value = true
-  register.value = false
+const isLoginActive = ref(true)
+
+// Optional: Meldungen zurücksetzen, wenn der Tab gewechselt wird
+watch(isLoginActive, () => {
   errorMessage.value = ''
-}
-
-function toggleRegister() {
-  register.value = true
-  signIn.value = false
   registerMessage.value = ''
-}
+})
 </script>
 
 <template>
@@ -110,7 +118,11 @@ function toggleRegister() {
     <IconPlantJar class="h-1/3 justify-self-center"/>
 
     <div class="h-[45vh] sticky bottom-0 left-6 right-6">
-      <ElementToggle primaryButtonText="Login" secondaryButtonText="Registrieren">
+      <ElementToggle
+        v-model="isLoginActive"
+        primaryButtonText="Login"
+        secondaryButtonText="Registrieren"
+      >
         <template #primary>
           <div v-if="errorMessage" id="signIn-message" role="alert" aria-live="polite" class="text-sm pb-2 text-red-600">
             {{ errorMessage }}

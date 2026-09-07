@@ -1,5 +1,3 @@
-// Checks if mail adress is already registered tp show if email is available
-
 import { createClient } from '@supabase/supabase-js'
 
 export default defineEventHandler(async (event) => {
@@ -7,8 +5,15 @@ export default defineEventHandler(async (event) => {
         const body = await readBody(event)
         const { email } = body
 
+        if (!email) {
+            throw createError({
+                statusCode: 400,
+                statusMessage: 'E-Mail-Adresse ist erforderlich'
+            })
+        }
+
         const supabase = createClient(
-            process.env.NUXT_PUBLIC_SUPABASE_URL || 'https://kgwunclxpepbuosbdain.supabase.co',
+            process.env.NUXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!,
             {
                 auth: {
@@ -18,30 +23,28 @@ export default defineEventHandler(async (event) => {
             }
         )
 
-        // Alle Benutzer abrufen und nach Email suchen
-        const { data: users, error } = await supabase.auth.admin.listUsers()
+        // Direkte O(1) Index-Abfrage über Postgres RPC
+        const { data: exists, error } = await supabase.rpc('check_email_exists', {
+            lookup_email: email
+        })
 
         if (error) {
-            console.error('Supabase Error:', error)
+            console.error('Supabase RPC Error:', error)
             throw createError({
                 statusCode: 500,
-                statusMessage: 'Fehler beim Abrufen der Benutzerdaten'
+                statusMessage: 'Fehler bei der E-Mail-Prüfung'
             })
         }
 
-        // Prüfen ob Email bereits existiert
-        const emailExists = users.users.some(user => user.email === email)
-
         return {
-            exists: emailExists,
-            message: emailExists ? 'E-Mail-Adresse bereits registriert' : 'E-Mail-Adresse verfügbar'
+            exists: Boolean(exists),
+            message: exists ? 'E-Mail-Adresse bereits registriert' : 'E-Mail-Adresse verfügbar'
         }
-
-    } catch (error) {
+    } catch (error: any) {
         console.error('API Error:', error)
         throw createError({
-            statusCode: 500,
-            statusMessage: 'Server-Fehler bei der Email-Prüfung'
+            statusCode: error.statusCode || 500,
+            statusMessage: error.statusMessage || 'Server-Fehler bei der Email-Prüfung'
         })
     }
 })

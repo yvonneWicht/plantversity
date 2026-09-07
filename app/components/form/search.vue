@@ -14,6 +14,10 @@ const results = ref<any[]>([])
 const selectedPlantId = ref<string | null>(null)
 const isSubmitting = ref(false)
 const isSelected = ref(false)
+const searchWrapper = ref<HTMLElement | null>(null)
+
+const DEBOUNCE_MS = 250
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 function getLocalDateString(date = new Date()): string {
   const year = date.getFullYear()
@@ -22,10 +26,26 @@ function getLocalDateString(date = new Date()): string {
   return `${year}-${month}-${day}`
 }
 
-watch(search, async (value) => {
+async function fetchResults(value: string) {
+  try {
+    const response = await $fetch('/api/plants', {
+      query: { search: value }
+    })
+    results.value = response
+  } catch (error) {
+    console.error('Fehler beim Laden der Pflanzen:', error)
+  }
+}
+
+watch(search, (value) => {
   if (isSelected.value) {
     isSelected.value = false
     return
+  }
+
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    debounceTimer = null
   }
 
   if (!value || value.length < 3) {
@@ -36,16 +56,24 @@ watch(search, async (value) => {
 
   selectedPlantId.value = null
 
-  try {
-    const response = await $fetch(`/api/plants`, {
-      query: {
-        search: value
-      }
-    })
-    results.value = response
-  } catch (error) {
-    console.error('Fehler beim Laden der Pflanzen:', error)
+  debounceTimer = setTimeout(() => {
+    fetchResults(value)
+  }, DEBOUNCE_MS)
+})
+
+function handleClickOutside(event: MouseEvent) {
+  if (searchWrapper.value && !searchWrapper.value.contains(event.target as Node)) {
+    results.value = []
   }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+  if (debounceTimer) clearTimeout(debounceTimer)
 })
 
 function selectPlant(plant: { name: string; id: string }) {
@@ -60,20 +88,17 @@ function selectPlant(plant: { name: string; id: string }) {
 async function addPlant(plantId: string | null) {
   if (!plantId) return
 
-  // 1. Check if the plant was already added today
   const isAlreadyAdded = props.dailyPlants?.some(
     (entry) => entry.plant?.id === plantId || entry.plant === plantId
   )
 
   if (isAlreadyAdded) {
     console.warn('Diese Pflanze wurde heute bereits eingetragen.')
-    // Reset inputs and exit early without making an API request
     search.value = ''
     selectedPlantId.value = null
     return
   }
 
-  // 2. Retrieve the user ID (using a fallback directly via the session if `useSupabaseUser` has not yet responded)
   let userId = user.value?.id
   if (!userId) {
     const { data: sessionData } = await supabase.auth.getSession()
@@ -83,8 +108,7 @@ async function addPlant(plantId: string | null) {
   isSubmitting.value = true
 
   try {
-    console.log(new Date().getDate())
-    const response = await $fetch('/api/daily-plants', {
+    await $fetch('/api/daily-plants', {
       method: 'POST',
       body: {
         plant: plantId,
@@ -93,8 +117,6 @@ async function addPlant(plantId: string | null) {
       }
     })
 
-    console.log('Pflanze erfolgreich hinzugefügt:', response)
-    // Reset form after successful submission
     search.value = ''
     selectedPlantId.value = null
   } catch (error) {
@@ -107,33 +129,35 @@ async function addPlant(plantId: string | null) {
 </script>
 
 <template>
-  <form class="relative z-10" @submit.prevent="addPlant(selectedPlantId)">
-    <FormInput
-      v-model="search"
-      :type="type"
-      :id="id"
-      :name="name"
-      :placeholder="placeholder"
-      class="w-full pr-16"
-    />
+  <div ref="searchWrapper" class="relative">
+    <form class="relative z-10" @submit.prevent="addPlant(selectedPlantId)">
+      <FormInput
+        v-model="search"
+        :type="type"
+        :id="id"
+        :name="name"
+        :placeholder="placeholder"
+        class="w-full pr-16"
+      />
 
-    <ButtonPrimary
-      type="button"
-      class="absolute right-0 top-1/2 -translate-y-1/2 h-full aspect-square"
-      :disabled="!selectedPlantId || isSubmitting"
-      @click="addPlant(selectedPlantId)"
-    >
-      +
-    </ButtonPrimary>
-  </form>
+      <ButtonPrimary
+        type="button"
+        class="absolute right-0 top-1/2 -translate-y-1/2 h-full aspect-square"
+        :disabled="!selectedPlantId || isSubmitting"
+        @click="addPlant(selectedPlantId)"
+      >
+        +
+      </ButtonPrimary>
+    </form>
 
-  <div v-if="results.length > 0" class="relative">
-    <ul class="absolute top-full left-0 right-0 rounded-3xl bg-white -mt-8 pt-8 z-0">
-      <li v-for="result in results" :key="result.id" class="px-4 py-1">
-        <button type="button" @click="selectPlant(result)">
-          {{ result.name }}
-        </button>
-      </li>
-    </ul>
+    <div v-if="results.length > 0" class="relative">
+      <ul class="absolute top-full left-0 right-0 rounded-3xl bg-white -mt-8 pt-8 z-0">
+        <li v-for="result in results" :key="result.id" class="px-4 py-1">
+          <button type="button" @click="selectPlant(result)" class="text-left w-full">
+            {{ result.name }}
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
