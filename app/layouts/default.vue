@@ -7,7 +7,7 @@
 <template>
   <div class="flex flex-col h-svh py-2 px-3">
     <div class="flex flex-col grow min-h-0">
-      <NavigationTop/>
+      <NavigationTop class="mb-4"/>
 
       <div class="flex flex-col grow min-h-0">
         <slot />

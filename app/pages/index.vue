@@ -14,7 +14,7 @@ const { data: plantPoints } = await useFetch('/api/plant-points')
 
 <template>
   <div class="flex flex-col gap-3 h-full grow min-h-0">
-    <IconPlantJar class="flex-none min-h-2/5 max-h-2/4 justify-self-center px-16"/>
+    <IconPlantJar class="flex-none justify-self-center px-8 -mt-9"/>
 
     <ElementProgressBar class="flex-none" :amount-weekly-plants="plantPoints?.totalPoints ?? 0"/>
 
