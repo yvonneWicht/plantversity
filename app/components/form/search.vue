@@ -11,12 +11,20 @@ interface DailyPlantEntry {
   [key: string]: unknown
 }
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   type?: string
   id?: string
   name?: string
   placeholder?: string
   dailyPlants?: DailyPlantEntry[]
+  existingPlantIds?: string[]
+  autoSubmit?: boolean
+}>(), {
+  autoSubmit: true
+})
+
+const emit = defineEmits<{
+  add: [plant: { id: string; name: string }]
 }>()
 
 const user = useSupabaseUser()
@@ -102,10 +110,17 @@ async function addPlant(plantId: string | null) {
 
   const isAlreadyAdded = props.dailyPlants?.some(
     (entry) => entry.plant?.id === plantId || entry.plant === plantId
-  )
+  ) || props.existingPlantIds?.includes(plantId)
 
   if (isAlreadyAdded) {
-    console.warn('Diese Pflanze wurde heute bereits eingetragen.')
+    console.warn('Diese Pflanze wurde bereits hinzugefügt.')
+    search.value = ''
+    selectedPlantId.value = null
+    return
+  }
+
+  if (!props.autoSubmit) {
+    emit('add', { id: plantId, name: search.value })
     search.value = ''
     selectedPlantId.value = null
     return

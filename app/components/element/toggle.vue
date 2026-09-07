@@ -32,10 +32,10 @@ const isPrimary = defineModel<boolean>({ default: true })
       </div>
     </div>
 
-    <div v-if="isPrimary">
+    <div v-if="isPrimary" class="grow flex flex-col min-h-0">
       <slot name="primary" />
     </div>
-    <div v-else>
+    <div v-else class="grow flex flex-col min-h-0">
       <slot name="secondary" />
     </div>
   </ElementBox>
