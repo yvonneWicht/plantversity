@@ -1,22 +1,32 @@
 <script setup lang="ts">
-defineProps({
-  targetLink: String,
-  type: String,
-  state: Boolean,
-  "data-testid": String
-})
+defineProps<{
+  targetLink?: string
+  type?: 'button' | 'submit' | 'reset'
+  state?: boolean
+  class?: string
+  'dataTestId'?: string
+}>()
 </script>
 
 <template>
-  <NuxtLink :to="targetLink" class="flex flex-col">
-    <button
-      class="p-2 rounded-full"
-      :class="state ? 'bg-beige' : 'bg-transparent'"
-      :type
-      :data-testid
-    >
-      <slot/>
-    </button>
-
+  <NuxtLink
+    v-if="targetLink"
+    :to="targetLink"
+    role="button"
+    class="p-2 rounded-full inline-block text-center"
+    :class="[state ? 'bg-beige' : 'bg-transparent', $props.class]"
+    :data-testid="$props['dataTestId']"
+  >
+    <slot />
   </NuxtLink>
+
+  <button
+    v-else
+    class="p-2 rounded-full"
+    :class="[state ? 'bg-beige' : 'bg-transparent', $props.class]"
+    :type="type || 'button'"
+    :data-testid="$props['dataTestId']"
+  >
+    <slot />
+  </button>
 </template>

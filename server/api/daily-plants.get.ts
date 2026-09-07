@@ -1,5 +1,6 @@
 import {createClient} from '@supabase/supabase-js'
 import {serverSupabaseUser} from '#supabase/server'
+import {getStartDateForRange, type DateRange} from '../utils/date'
 
 export default defineEventHandler(async (event) => {
     // User aus der Session lesen -> Route ist nur für eingeloggte User nutzbar
@@ -7,7 +8,7 @@ export default defineEventHandler(async (event) => {
     if (!user) throw createError({ statusCode: 401 })
 
     const query = getQuery(event)
-    const range = (query.range as string) || 'today'
+    const range = (query.range as DateRange) || 'today'
 
     // Authentication to Supabase, needed to make database requests
     const supabase = createClient(
@@ -21,21 +22,7 @@ export default defineEventHandler(async (event) => {
         }
     )
 
-    function getLocalDateString(date = new Date()): string {
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const day = String(date.getDate()).padStart(2, '0')
-        return `${year}-${month}-${day}`
-    }
-
-    const startDate = new Date();
-
-    if (range === '7days') {
-        startDate.setDate(startDate.getDate() - 6)
-    }
-
-    const dateString = getLocalDateString(startDate)
-
+    const dateString = getStartDateForRange(range)
 
     const { data: dailyPlants, error } = await supabase
         .from('daily_plants')
@@ -43,10 +30,6 @@ export default defineEventHandler(async (event) => {
         .eq('created_by', user?.user_metadata?.sub)
         .gte('created_at', dateString)
 
-
-    console.log(user?.user_metadata?.sub)
-    console.log('Daily Plants:', dailyPlants)
-    console.log('Error:', error)
     if (error) {
         throw createError({
             statusCode: 500,

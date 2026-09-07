@@ -1,43 +1,42 @@
-<!--This component is used to toggle between two different views.-->
-
 <script setup lang="ts">
-defineProps({
-  primaryButtonText: String,
-  secondaryButtonText: String
-})
+defineProps<{
+  primaryButtonText?: string
+  secondaryButtonText?: string
+}>()
 
-const primaryState = ref(true)
-const secondaryState = ref(false)
-
-function togglePrimary() {
-  primaryState.value = true
-  secondaryState.value = false
-}
-
-function toggleSecondary() {
-  secondaryState.value = true
-  primaryState.value = false
-}
+const isPrimary = defineModel<boolean>({ default: true })
 </script>
 
 <template>
   <ElementBox>
     <div class="flex flex-row gap-2 mb-2">
       <div class="basis-1/2">
-        <ButtonSecondary @click="togglePrimary" :state=primaryState
-                         datatestid="primaryToggle">{{ primaryButtonText }}</ButtonSecondary>
+        <ButtonSecondary
+          :state="isPrimary"
+          class="w-full"
+          data-testid="primaryToggle"
+          @click="isPrimary = true"
+        >
+          {{ primaryButtonText }}
+        </ButtonSecondary>
       </div>
       <div class="basis-1/2">
-        <ButtonSecondary @click="toggleSecondary" :state=secondaryState
-                         datatestid="secondaryToggle">{{ secondaryButtonText }}</ButtonSecondary>
+        <ButtonSecondary
+          :state="!isPrimary"
+          class="w-full"
+          data-testid="secondaryToggle"
+          @click="isPrimary = false"
+        >
+          {{ secondaryButtonText }}
+        </ButtonSecondary>
       </div>
     </div>
 
-    <div v-if="primaryState">
-      <slot name="primary"/>
+    <div v-if="isPrimary">
+      <slot name="primary" />
     </div>
-    <div v-if="secondaryState">
-      <slot name="secondary"/>
+    <div v-else>
+      <slot name="secondary" />
     </div>
   </ElementBox>
 </template>

@@ -4,7 +4,7 @@ definePageMeta({
   layout: 'login',
 })
 
-const {currentUser, isLoggedIn} = useAuth()
+const {isLoggedIn} = useAuth()
 
 // Weiterleitung wenn bereits eingeloggt
 watchEffect(() => {
@@ -26,7 +26,7 @@ async function signInWithEmailPassword(event: Event) {
   errorMessage.value = ''
 
   try {
-    const {data, error} = await supabase.auth.signInWithPassword({
+    const {error} = await supabase.auth.signInWithPassword({
       email,
       password
     })
@@ -36,7 +36,7 @@ async function signInWithEmailPassword(event: Event) {
       return
     }
 
-  } catch (error) {
+  } catch {
     errorMessage.value = 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.'
   }
 }
@@ -63,7 +63,7 @@ async function registerWithEmailPassword(event: Event) {
     }
 
     // Registrierung mit Supabase (Frontend → Supabase)
-    const {data, error} = await supabase.auth.signUp({
+    const {error} = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -82,57 +82,61 @@ async function registerWithEmailPassword(event: Event) {
 
     registerMessage.value = 'Bestätige deine Mail-Adresse über den Link in der E-Mail um die Registrierung abzuschließen.'
 
-  } catch (error) {
+  } catch {
     registerMessage.value = 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.'
   }
 }
 
-// UI State
-const signIn = ref(true)
-const register = ref(false)
+const isLoginActive = ref(true)
 
-function toggleSignIn() {
-  signIn.value = true
-  register.value = false
+// Optional: Meldungen zurücksetzen, wenn der Tab gewechselt wird
+watch(isLoginActive, () => {
   errorMessage.value = ''
-}
-
-function toggleRegister() {
-  register.value = true
-  signIn.value = false
   registerMessage.value = ''
-}
+})
 </script>
 
 <template>
+  <div class="flex flex-col justify-between h-full">
     <h1 class="text-3xl font-bold">Willkommen bei Plantversity!</h1>
 
     <IconPlantJar class="h-1/3 justify-self-center"/>
 
     <div class="h-[45vh] sticky bottom-0 left-6 right-6">
-      <ElementToggle primaryButtonText="Login" secondaryButtonText="Registrieren">
+      <ElementToggle
+        v-model="isLoginActive"
+        primary-button-text="Login"
+        secondary-button-text="Registrieren"
+      >
         <template #primary>
           <div v-if="errorMessage" id="signIn-message" role="alert" aria-live="polite" class="text-sm pb-2 text-red-600">
             {{ errorMessage }}
           </div>
-          <form class="flex flex-col gap-3" id="login-form" @submit.prevent="signInWithEmailPassword">
-            <FormInput type="email" id="login-email" name="email" placeholder="E-Mail-Adresse" required/>
-            <FormInput type="password" id="login-password" name="password" placeholder="Passwort" required/>
+          <form id="login-form" class="flex flex-col gap-3" @submit.prevent="signInWithEmailPassword">
+            <FormInput id="login-email" type="email" name="email" placeholder="E-Mail-Adresse" required/>
+            <FormInput id="login-password" type="password" name="password" placeholder="Passwort" required/>
             <ButtonPrimary type="submit">Anmelden</ButtonPrimary>
           </form>
         </template>
         <template #secondary>
-          <div v-if="registerMessage" id="register-message" role="alert" aria-live="polite" class="text-sm pb-2"
-               :class="registerMessage.includes('abzuschließen') ? 'text-green-600' : 'text-red-600'">
+          <div
+            v-if="registerMessage"
+            id="register-message"
+            role="alert"
+            aria-live="polite"
+            class="text-sm pb-2"
+            :class="registerMessage.includes('abzuschließen') ? 'text-green-600' : 'text-red-600'"
+          >
             {{ registerMessage }}
           </div>
-          <form v-if="!registerMessage.includes('abzuschließen')" class="flex flex-col gap-3" id="register-form" @submit.prevent="registerWithEmailPassword">
-            <FormInput type="email" id="register-email" name="email" placeholder="E-Mail-Adresse" required/>
-            <FormInput type="password" id="register-password" name="password" placeholder="Passwort (min. 6 Zeichen)" minlength="6" required/>
-            <FormInput type="text" id="register-display-name" name="displayName" placeholder="Wie sollen wir dich nennen?" required/>
+          <form v-if="!registerMessage.includes('abzuschließen')" id="register-form" class="flex flex-col gap-3" @submit.prevent="registerWithEmailPassword">
+            <FormInput id="register-email" type="email" name="email" placeholder="E-Mail-Adresse" required/>
+            <FormInput id="register-password" type="password" name="password" placeholder="Passwort (min. 6 Zeichen)" minlength="6" required/>
+            <FormInput id="register-display-name" type="text" name="displayName" placeholder="Wie sollen wir dich nennen?" required/>
             <ButtonPrimary type="submit">Registrieren</ButtonPrimary>
           </form>
         </template>
       </ElementToggle>
     </div>
+  </div>
 </template>
