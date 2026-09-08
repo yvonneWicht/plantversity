@@ -98,6 +98,67 @@ const isDirty = computed(() => {
   return currentIds.some((id, index) => id !== originalPlantIds.value[index])
 })
 
+// Bestimmt, ob beim Verlassen des Formular-Tabs gewarnt werden muss: beim Bearbeiten sobald sich
+// etwas gegenüber dem Original geändert hat, beim Erstellen sobald erste Eingaben gemacht wurden
+const hasUnsavedChanges = computed(() => {
+  if (!isPrimary.value) {
+    if (isEditing.value) return isDirty.value
+    return mealName.value.trim().length > 0 || selectedPlants.value.length > 0
+  }
+  return false
+})
+
+const showLeaveWarning = ref(false)
+let onConfirmLeave: (() => void) | null = null
+let onCancelLeave: (() => void) | null = null
+
+function requestLeave(action: () => void, onCancel?: () => void) {
+  if (!hasUnsavedChanges.value) {
+    action()
+    return
+  }
+  onConfirmLeave = action
+  onCancelLeave = onCancel ?? null
+  showLeaveWarning.value = true
+}
+
+function confirmLeaveWarning() {
+  showLeaveWarning.value = false
+  const action = onConfirmLeave
+  onConfirmLeave = null
+  onCancelLeave = null
+  action?.()
+}
+
+function cancelLeaveWarning() {
+  showLeaveWarning.value = false
+  const onCancel = onCancelLeave
+  onConfirmLeave = null
+  onCancelLeave = null
+  onCancel?.()
+}
+
+function handleTabChange(next: boolean) {
+  if (next && !isPrimary.value) {
+    requestLeave(() => {
+      isPrimary.value = true
+    })
+    return
+  }
+  isPrimary.value = next
+}
+
+onBeforeRouteLeave(() => {
+  if (!hasUnsavedChanges.value) return true
+
+  return new Promise<boolean>((resolve) => {
+    requestLeave(
+      () => resolve(true),
+      () => resolve(false)
+    )
+  })
+})
+
 const canSave = computed(() =>
   mealName.value.trim().length > 0 &&
   !nameTaken.value &&
@@ -165,11 +226,14 @@ async function saveMeal() {
 
 <template>
   <div class="flex flex-col gap-3 h-full grow min-h-0">
+    <ElementWarning v-if="showLeaveWarning" @stay="cancelLeaveWarning" @leave="confirmLeaveWarning"/>
+
     <ElementToggle
-      v-model="isPrimary"
+      :model-value="isPrimary"
       primary-button-text="Deine Mahlzeiten"
       :secondary-button-text="isEditing ? 'Mahlzeit bearbeiten' : 'Mahlzeit erstellen'"
       class="grow min-h-0"
+      @update:model-value="handleTabChange"
     >
       <template #primary>
         <div v-if="meals && meals.length > 0" class="flex flex-col gap-3 h-full min-h-0">
