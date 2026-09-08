@@ -16,11 +16,19 @@ export default defineEventHandler(async (event) => {
         }
     )
 
+    const { search } = getQuery(event)
+
     // !inner sorgt dafür, dass nur Mahlzeiten mit mindestens einer verknüpften Pflanze zurückgegeben werden
-    const { data: meals, error } = await supabase
+    let query = supabase
         .from('meals')
         .select('id, name, created_at, meal_plants!inner(plant:plants(id, name))')
         .eq('created_by', user.sub)
+
+    if (typeof search === 'string' && search) {
+        query = query.ilike('name', `${search}%`).limit(10)
+    }
+
+    const { data: meals, error } = await query
 
     if (error) {
         throw createError({
