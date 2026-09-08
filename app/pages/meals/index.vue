@@ -22,7 +22,17 @@ const selectedPlants = ref<Plant[]>([])
 const isSaving = ref(false)
 const saveError = ref('')
 
-const {data: meals, refresh: refreshMeals} = await useFetch<MealListItem[]>('/api/meals')
+const editingMealId = ref<string | null>(null)
+const originalName = ref('')
+const originalPlantIds = ref<string[]>([])
+
+const isEditing = computed(() => editingMealId.value !== null)
+
+const { data: meals, refresh: refreshMeals } = await useFetch<MealListItem[]>('/api/meals')
+
+const sortedSelectedPlants = computed(() =>
+  [...selectedPlants.value].sort((a, b) => a.name.localeCompare(b.name, 'de'))
+)
 
 const DEBOUNCE_MS = 250
 let nameCheckTimer: ReturnType<typeof setTimeout> | null = null
@@ -41,9 +51,9 @@ watch(mealName, (value) => {
 
   nameCheckTimer = setTimeout(async () => {
     try {
-      const response = await $fetch('/api/check-meal-name', {
+      const response = await $fetch('/api/meals/check-name', {
         method: 'POST',
-        body: {name: trimmed}
+        body: { name: trimmed, excludeId: editingMealId.value ?? undefined }
       })
       nameTaken.value = response.exists
     } catch (error) {
@@ -52,11 +62,48 @@ watch(mealName, (value) => {
   }, DEBOUNCE_MS)
 })
 
+function resetForm() {
+  mealName.value = ''
+  selectedPlants.value = []
+  nameTaken.value = false
+  saveError.value = ''
+  editingMealId.value = null
+  originalName.value = ''
+  originalPlantIds.value = []
+}
+
+// Beim Verlassen des Formular-Tabs zurück zur Liste immer einen sauberen Neustart sicherstellen
+watch(isPrimary, (value) => {
+  if (value) resetForm()
+})
+
+function openMealForEdit(meal: MealListItem) {
+  editingMealId.value = meal.id
+  mealName.value = meal.name
+  selectedPlants.value = [...meal.plants]
+  originalName.value = meal.name
+  originalPlantIds.value = meal.plants.map((plant) => plant.id).sort()
+  nameTaken.value = false
+  saveError.value = ''
+  isPrimary.value = false
+}
+
+const isDirty = computed(() => {
+  if (!isEditing.value) return true
+
+  if (mealName.value.trim() !== originalName.value) return true
+
+  const currentIds = selectedPlants.value.map((plant) => plant.id).sort()
+  if (currentIds.length !== originalPlantIds.value.length) return true
+  return currentIds.some((id, index) => id !== originalPlantIds.value[index])
+})
+
 const canSave = computed(() =>
   mealName.value.trim().length > 0 &&
   !nameTaken.value &&
   selectedPlants.value.length >= 2 &&
-  !isSaving.value
+  !isSaving.value &&
+  isDirty.value
 )
 
 function addPlant(plant: Plant) {
@@ -74,24 +121,31 @@ async function saveMeal() {
   saveError.value = ''
 
   try {
-    const meal = await $fetch('/api/meals', {
-      method: 'POST',
-      body: {name: mealName.value.trim()}
-    })
+    if (isEditing.value) {
+      await $fetch(`/api/meals/${editingMealId.value}`, {
+        method: 'PATCH',
+        body: {
+          name: mealName.value.trim(),
+          plant_ids: selectedPlants.value.map((plant) => plant.id)
+        }
+      })
+    } else {
+      const meal = await $fetch('/api/meals', {
+        method: 'POST',
+        body: { name: mealName.value.trim() }
+      })
 
-    await $fetch('/api/meal-plants', {
-      method: 'POST',
-      body: {
-        meal_id: meal.id,
-        plant_ids: selectedPlants.value.map((plant) => plant.id)
-      }
-    })
+      await $fetch('/api/meals/meal-plants', {
+        method: 'POST',
+        body: {
+          meal_id: meal.id,
+          plant_ids: selectedPlants.value.map((plant) => plant.id)
+        }
+      })
+    }
 
-    mealName.value = ''
-    selectedPlants.value = []
-    nameTaken.value = false
     await refreshMeals()
-    isPrimary.value = false
+    isPrimary.value = true
   } catch (error: unknown) {
     console.error('Fehler beim Speichern der Mahlzeit:', error)
     const err = error as { statusCode?: number; statusMessage?: string; data?: { statusMessage?: string } }
@@ -111,11 +165,15 @@ async function saveMeal() {
 
 <template>
   <div class="flex flex-col gap-3 h-full grow min-h-0">
-    <ElementToggle v-model="isPrimary" primary-button-text="Deine Mahlzeiten" secondary-button-text="Mahlzeit erstellen"
-                   class="grow min-h-0">
+    <ElementToggle
+      v-model="isPrimary"
+      primary-button-text="Deine Mahlzeiten"
+      :secondary-button-text="isEditing ? 'Mahlzeit bearbeiten' : 'Mahlzeit erstellen'"
+      class="grow min-h-0"
+    >
       <template #primary>
         <div v-if="meals && meals.length > 0" class="flex flex-col gap-3 h-full min-h-0">
-          <ElementMeal v-for="meal in meals" :key="meal.id" :name="meal.name"/>
+          <ElementMeal v-for="meal in meals" :key="meal.id" :name="meal.name" @open="openMealForEdit(meal)"/>
         </div>
         <div v-else class="flex flex-col gap-3 h-full min-h-0">
           <div class="flex flex-col gap-3 items-center justify-center grow">
@@ -148,9 +206,10 @@ async function saveMeal() {
 
           <div class="grow flex flex-col gap-2 min-h-0 overflow-y-scroll">
             <ElementMealPlant
-              v-for="plant in selectedPlants"
+              v-for="plant in sortedSelectedPlants"
               :key="plant.id"
               :name="plant.name"
+              :disabled="isEditing && selectedPlants.length <= 2"
               @remove="removePlant(plant.id)"
             />
           </div>
@@ -160,7 +219,7 @@ async function saveMeal() {
           </div>
 
           <ButtonPrimary class="w-full flex-none" :disabled="!canSave" @click="saveMeal">
-            Mahlzeit speichern
+            {{ isEditing ? 'Änderungen speichern' : 'Mahlzeit speichern' }}
           </ButtonPrimary>
         </div>
       </template>
