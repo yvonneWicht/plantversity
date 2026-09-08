@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
 
     const body = await readBody(event)
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
+    const excludeId = typeof body?.excludeId === 'string' ? body.excludeId : undefined
 
     if (!name) {
         throw createError({
@@ -26,12 +27,17 @@ export default defineEventHandler(async (event) => {
         }
     )
 
-    const { data: existingMeal, error } = await supabase
+    let query = supabase
         .from('meals')
         .select('id')
         .eq('created_by', user.sub)
         .eq('name', name)
-        .maybeSingle()
+
+    if (excludeId) {
+        query = query.neq('id', excludeId)
+    }
+
+    const { data: existingMeal, error } = await query.maybeSingle()
 
     if (error) {
         throw createError({

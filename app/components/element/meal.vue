@@ -2,6 +2,10 @@
 defineProps<{
   name: string
 }>()
+
+const emit = defineEmits<{
+  open: []
+}>()
 </script>
 
 <template>
@@ -11,7 +15,7 @@ defineProps<{
     <ButtonPrimary
       type="button"
       class="absolute right-0 top-1/2 -translate-y-1/2 h-full aspect-square"
-      @click=""
+      @click="emit('open')"
     >
       >
     </ButtonPrimary>
