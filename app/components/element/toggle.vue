@@ -9,7 +9,7 @@ const isPrimary = defineModel<boolean>({ default: true })
 
 <template>
   <ElementBox>
-    <div class="flex flex-row gap-2 mb-2">
+    <div class="flex flex-row gap-2 mb-3">
       <div class="basis-1/2">
         <ButtonSecondary
           :state="isPrimary"
@@ -32,10 +32,10 @@ const isPrimary = defineModel<boolean>({ default: true })
       </div>
     </div>
 
-    <div v-if="isPrimary">
+    <div v-if="isPrimary" class="grow flex flex-col min-h-0">
       <slot name="primary" />
     </div>
-    <div v-else>
+    <div v-else class="grow flex flex-col min-h-0">
       <slot name="secondary" />
     </div>
   </ElementBox>

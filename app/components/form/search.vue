@@ -5,25 +5,42 @@ interface PlantSearchResult {
   [key: string]: unknown
 }
 
+interface MealSearchResult {
+  id: string
+  name: string
+  plants: { id: string; name: string }[]
+}
+
 interface DailyPlantEntry {
   id?: string
   plant?: string | PlantSearchResult | { id?: string; name?: string; [key: string]: unknown } | null
   [key: string]: unknown
 }
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   type?: string
   id?: string
   name?: string
   placeholder?: string
   dailyPlants?: DailyPlantEntry[]
+  existingPlantIds?: string[]
+  autoSubmit?: boolean
+  searchType?: 'plant' | 'meal'
+}>(), {
+  autoSubmit: true,
+  searchType: 'plant'
+})
+
+const emit = defineEmits<{
+  add: [plant: { id: string; name: string }]
 }>()
 
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
 const search = defineModel<string>()
-const results = ref<PlantSearchResult[]>([])
+const results = ref<(PlantSearchResult | MealSearchResult)[]>([])
 const selectedPlantId = ref<string | null>(null)
+const selectedMeal = ref<MealSearchResult | null>(null)
 const isSubmitting = ref(false)
 const isSelected = ref(false)
 const searchWrapper = ref<HTMLElement | null>(null)
@@ -40,12 +57,12 @@ function getLocalDateString(date = new Date()): string {
 
 async function fetchResults(value: string) {
   try {
-    const response = await $fetch('/api/plants', {
-      query: { search: value }
-    })
+    const response = props.searchType === 'meal'
+      ? await $fetch('/api/meals', { query: { search: value } })
+      : await $fetch('/api/plants', { query: { search: value } })
     results.value = response
   } catch (error) {
-    console.error('Fehler beim Laden der Pflanzen:', error)
+    console.error('Fehler beim Laden der Suchergebnisse:', error)
   }
 }
 
@@ -63,10 +80,12 @@ watch(search, (value) => {
   if (!value || value.length < 3) {
     results.value = []
     selectedPlantId.value = null
+    selectedMeal.value = null
     return
   }
 
   selectedPlantId.value = null
+  selectedMeal.value = null
 
   debounceTimer = setTimeout(() => {
     fetchResults(value)
@@ -88,24 +107,86 @@ onBeforeUnmount(() => {
   if (debounceTimer) clearTimeout(debounceTimer)
 })
 
-function selectPlant(plant: { name: string; id: string }) {
-  if (search.value !== plant.name) {
+function selectPlant(result: PlantSearchResult | MealSearchResult) {
+  if (search.value !== result.name) {
     isSelected.value = true
-    search.value = plant.name
+    search.value = result.name
   }
-  selectedPlantId.value = plant.id
+  selectedPlantId.value = result.id
+  selectedMeal.value = props.searchType === 'meal' ? (result as MealSearchResult) : null
   results.value = []
+}
+
+function isPlantTracked(plantId: string): boolean {
+  return Boolean(
+    props.dailyPlants?.some((entry) => entry.plant?.id === plantId || entry.plant === plantId) ||
+    props.existingPlantIds?.includes(plantId)
+  )
+}
+
+async function trackPlant(plantId: string, userId: string | undefined) {
+  await $fetch('/api/daily-plants', {
+    method: 'POST',
+    body: {
+      plant: plantId,
+      created_by: userId,
+      created_at: getLocalDateString()
+    }
+  })
+}
+
+async function addMeal(meal: MealSearchResult) {
+  const newPlantIds = meal.plants
+    .map((plant) => plant.id)
+    .filter((plantId) => !isPlantTracked(plantId))
+
+  if (newPlantIds.length === 0) {
+    console.warn('Alle Pflanzen dieser Mahlzeit wurden heute bereits eingetragen.')
+    search.value = ''
+    selectedPlantId.value = null
+    selectedMeal.value = null
+    return
+  }
+
+  let userId = user.value?.id
+  if (!userId) {
+    const { data: sessionData } = await supabase.auth.getSession()
+    userId = sessionData.session?.user?.id
+  }
+
+  isSubmitting.value = true
+
+  try {
+    await Promise.all(newPlantIds.map((plantId) => trackPlant(plantId, userId)))
+
+    search.value = ''
+    selectedPlantId.value = null
+    selectedMeal.value = null
+  } catch (error) {
+    console.error('Fehler beim Hinzufügen der Mahlzeit:', error)
+  } finally {
+    isSubmitting.value = false
+    await refreshNuxtData()
+  }
 }
 
 async function addPlant(plantId: string | null) {
   if (!plantId) return
 
-  const isAlreadyAdded = props.dailyPlants?.some(
-    (entry) => entry.plant?.id === plantId || entry.plant === plantId
-  )
+  if (props.searchType === 'meal') {
+    if (selectedMeal.value) await addMeal(selectedMeal.value)
+    return
+  }
 
-  if (isAlreadyAdded) {
-    console.warn('Diese Pflanze wurde heute bereits eingetragen.')
+  if (isPlantTracked(plantId)) {
+    console.warn('Diese Pflanze wurde bereits hinzugefügt.')
+    search.value = ''
+    selectedPlantId.value = null
+    return
+  }
+
+  if (!props.autoSubmit) {
+    emit('add', { id: plantId, name: search.value })
     search.value = ''
     selectedPlantId.value = null
     return
@@ -120,14 +201,7 @@ async function addPlant(plantId: string | null) {
   isSubmitting.value = true
 
   try {
-    await $fetch('/api/daily-plants', {
-      method: 'POST',
-      body: {
-        plant: plantId,
-        created_by: userId,
-        created_at: getLocalDateString()
-      }
-    })
+    await trackPlant(plantId, userId)
 
     search.value = ''
     selectedPlantId.value = null
