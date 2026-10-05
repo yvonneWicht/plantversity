@@ -35,6 +35,7 @@ const emit = defineEmits<{
   add: [plant: { id: string; name: string }]
 }>()
 
+const { checkAchievements } = useAchievements()
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
 const search = defineModel<string>()
@@ -167,6 +168,7 @@ async function addMeal(meal: MealSearchResult) {
   } finally {
     isSubmitting.value = false
     await refreshNuxtData()
+    await checkAchievements()
   }
 }
 
@@ -210,6 +212,7 @@ async function addPlant(plantId: string | null) {
   } finally {
     isSubmitting.value = false
     await refreshNuxtData()
+    await checkAchievements()
   }
 }
 </script>
