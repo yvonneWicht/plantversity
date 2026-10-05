@@ -17,5 +17,6 @@
     <div class="flex-none">
       <NavigationMain/>
     </div>
+    <ElementAchievementModal/>
   </div>
 </template>
