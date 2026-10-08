@@ -9,21 +9,27 @@ export function createServiceClient() {
     )
 }
 
-interface TrackedEntry {
+export interface TrackedEntry {
     date: string
     plantId: string
+    plantName: string
     categoryId: string | null
+    categorySlug: string | null
+    categoryName: string | null
 }
 
 const PAGE_SIZE = 1000
 
-async function loadEntries(supabase: ReturnType<typeof createServiceClient>, userId: string): Promise<TrackedEntry[]> {
+// Lädt alle getrackten Pflanzen des Nutzers, optional ab einem Startdatum (YYYY-MM-DD)
+export async function loadEntries(supabase: ReturnType<typeof createServiceClient>, userId: string, since?: string): Promise<TrackedEntry[]> {
     const entries: TrackedEntry[] = []
     for (let from = 0; ; from += PAGE_SIZE) {
-        const { data, error } = await supabase
+        let query = supabase
             .from('daily_plants')
-            .select('id, created_at, plant:plants!daily_plants_plant_fkey(id, plant_categories(categories(id)))')
+            .select('id, created_at, plant:plants!daily_plants_plant_fkey(id, name, plant_categories(categories(id, name, slug)))')
             .eq('created_by', userId)
+        if (since) query = query.gte('created_at', since)
+        const { data, error } = await query
             .order('id')
             .range(from, from + PAGE_SIZE - 1)
         if (error) throw createError({ statusCode: 500, statusMessage: error.message })
@@ -37,7 +43,10 @@ async function loadEntries(supabase: ReturnType<typeof createServiceClient>, use
             entries.push({
                 date: String(row.created_at).slice(0, 10),
                 plantId: plant.id,
-                categoryId: category?.id ?? null
+                plantName: plant.name ?? '',
+                categoryId: category?.id ?? null,
+                categorySlug: category?.slug ?? null,
+                categoryName: category?.name ?? null
             })
         }
         if (!data || data.length < PAGE_SIZE) break
