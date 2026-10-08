@@ -5,18 +5,6 @@ const props = defineProps<{
   range: '7days' | 'all'
 }>()
 
-// Farben je Kategorie (Slug), feste Zuordnung damit eine Kategorie immer dieselbe Farbe hat
-const CATEGORY_COLORS: Record<string, string> = {
-  'vegetables': '#2a78d6',
-  'fruit': '#eb6834',
-  'grains-pseudograins': '#1baf7a',
-  'legumes': '#eda100',
-  'nuts': '#e87ba4',
-  'seeds': '#008300',
-  'spices-extras': '#4a3aa7'
-}
-const FALLBACK_COLOR = '#7c8a6d'
-
 const { data: statistics } = useFetch('/api/statistics', {
   query: { range: props.range }
 })
@@ -25,8 +13,8 @@ const { data: statistics } = useFetch('/api/statistics', {
 <template>
   <div class="flex flex-col gap-3 grow min-h-0">
     <ElementBox headline="Gegessene Pflanzen" class="grow min-h-0">
-      <div v-if="statistics && statistics.plants.length > 0" class="flex flex-row flex-wrap content-start overflow-y-auto h-full min-h-0">
-        <div v-for="plant in statistics.plants" :key="plant.id" class="w-1/3 px-1 text-center">
+      <div v-if="statistics && statistics.plants.length > 0" class="flex flex-row flex-wrap gap-2 content-start justify-center overflow-y-auto h-full min-h-0">
+        <div v-for="plant in statistics.plants" :key="plant.id" class="px-1 text-center">
           {{ plant.name }}
         </div>
       </div>

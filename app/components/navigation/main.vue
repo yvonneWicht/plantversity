@@ -8,6 +8,6 @@
     <ButtonImage icon="material-symbols:trophy" link="/achievements">Erfolge</ButtonImage>
     <ButtonImage icon="material-symbols:psychiatry-outline" link="/">Home</ButtonImage>
     <ButtonImage icon="material-symbols:restaurant" link="/meals">Mahlzeiten</ButtonImage>
-    <ButtonImage icon="material-symbols:person" link="/account">Account</ButtonImage>
+    <ButtonImage icon="material-symbols:menu-book" link="/knowledge">Wissen</ButtonImage>
   </div>
 </template>
