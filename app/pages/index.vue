@@ -33,8 +33,8 @@ const { data: plantPoints } = await useFetch('/api/plant-points')
     </ElementToggle>
 
     <ElementBox headline="Heute gegessen" class="grow flex flex-col min-h-0">
-      <div v-if="dailyPlants && dailyPlants.length > 0" class="flex flex-row flex-wrap overflow-y-scroll h-full min-h-0">
-        <div v-for="plant in dailyPlants" :key="plant.id" class="w-1/3 px-1 text-center">
+      <div v-if="dailyPlants && dailyPlants.length > 0" class="flex flex-row flex-wrap gap-2 content-start justify-center overflow-y-scroll h-full min-h-0">
+        <div v-for="plant in dailyPlants" :key="plant.id" class="px-1 text-center">
           {{ plant.plant.name }}
         </div>
       </div>
